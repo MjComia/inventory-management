@@ -12,58 +12,27 @@ if (!$conn) {
     die("Connection Failed: " . mysqli_connect_error());
 }
 
-
-if(isset($_POST['register'])) {
-    $new_username = mysqli_real_escape_string($conn, $_POST ['new_username']);
-    $new_password = mysqli_real_escape_string($conn, $_POST ['new_password']);
-    $role = mysqli_real_escape_string($conn, $_POST ['role']);
-
-    $encrypted_password = md5($new_password);
-
-    //checker for user if already existing
-    $check_query = "SELECT * FROM users WHERE username = '$new_username'";
-    $check_result = mysqli_query($conn, $check_query);
-
-if(mysqli_num_rows($check_result) > 0) {
-    $register_error = "Username already exist. Please choose a different username";
-} else { //inserting new user in database
-    $insert_query = "INSERT INTO users (username, password, role) VALUES ('$new_username', '$encrypted_password', '$role')";    
-    if (mysqli_query($conn, $insert_query)) {
-        $register_success = "User registered successfully"; //hindi nag sshow kapag nag new register pwede tanggalin pero maganda ilagay
-
-        $_SESSION['username'] = $new_username;
-        $_SESSION['role'] = $role;
-
-        if ($role == 'admin') {
-            header("Location: admindash.php");
-        } elseif ($role == 'middleman') {
-            header("Location: middlemandash.php");
-        } elseif ($role == 'sender') {
-            header("Location: senderdash.php");
-        }
-        exit();
-    } else {
-        $register_error = "Error: " . mysqli_error($conn);
-    }
-  }
-}
-
-if(isset($_POST['login'])) {
+// Login check
+if (isset($_POST['login'])) {
+    // Sanitize inputs
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
+    // Encrypt password
     $encrypted_password = md5($password);
 
+    // Query for matching username and encrypted password
     $query = "SELECT * FROM users WHERE username = '$username' AND password = '$encrypted_password'";
     $result = mysqli_query($conn, $query);
    
+    // Check if the query returns a valid user
     if (mysqli_num_rows($result) == 1) {
-        
+        // Fetch user data and set session variables
         $user = mysqli_fetch_assoc($result);
         $_SESSION['username'] = $user['username'];
         $_SESSION['role'] = $user['role']; 
 
-        // Redirect according to user role
+        // Redirect based on user role
         if ($user['role'] == 'admin') {
             header("Location: admindash.php");
         } else if ($user['role'] == 'middleman') {
@@ -73,12 +42,15 @@ if(isset($_POST['login'])) {
         }
         exit();
     } else {
-        $error = "Invalid username and password.";
+        // Invalid credentials error
+        $error = "Invalid username or password.";
     }
 }
 
 mysqli_close($conn);
 ?>
+
+<!--------------------------------H T M L------------------------------------------------------------------------------------------------------------------>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -86,9 +58,22 @@ mysqli_close($conn);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login and Register</title>
+
+    <!--Stylesheets-->
+    <link rel="stylesheet" type="text/css" href="assets/cs/main.css"/>
+    
 </head>
 <body>
-    <h1>Login</h1>
+
+<?php if (isset($error)): ?>
+    <div class="error-message">
+        <?php echo $error; ?>
+    </div> 
+<?php endif; ?>
+
+
+    <!-- Login Form -->
+    <h1>Log In</h1>
     <?php if (isset($login_error)): ?>
         <p style="color: red;"><?php echo $login_error; ?></p>
     <?php endif; ?>
@@ -99,31 +84,12 @@ mysqli_close($conn);
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required autocomplete="off"><br><br>
         
-        <button type="submit" name="login"> Login</button>
-    </form>
-
-    <h1>Register</h1>
+        <button type="submit" name="login"> Log In</button>
+        <p>or</p>
+        <a href = "register.php">Create new account</a>
+    </form> 
     
-    <?php if (isset($register_error)): ?>
-        <p style= "color: red;"><?php echo $register_error; ?></p>
-        <?php elseif (isset($register_success)): ?>
-            <p style= "color: green;"> <?php echo  $register_success; ?></p>
-            <?php endif; ?>
-            <form method="POST" action="">
-                <label for="new_username">Username: </label>
-                <input type="text" id="new_username" name="new_username" required autocomplete="off"><br><br>
-
-                <label for="new_password">Password: </label>
-                <input type="password" id="new_password" name="new_password" required autocomplete="off"><br><br>
-
-                <label for="role" > Role: </label> 
-                <select id="role" name="role" required>
-                    <option value="admin">Admin</option>
-                    <option value="middleman">Middleman</option>
-                    <option value="sender">Sender</option>
-                </select><br><br>
-
-                <button type="submit" name="register">Register</button>
-        </form>
+        <!--JAVASCRIPTS-->
+        <script type="text/javascripts" src="assets/js/main.js"></script>
 </body>
 </html>
