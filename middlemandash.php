@@ -41,6 +41,8 @@ echo"Welcome, " . $_SESSION['username'] . "(Middleman)";
     </style>
 </head>
 <body>
+
+</form>
 <h1>Table Data</h1>
     <table>
         <thead>
@@ -74,8 +76,8 @@ echo"Welcome, " . $_SESSION['username'] . "(Middleman)";
                     echo "<td>" . $row["isle-shelf"] . "</td>";
                     echo "<td>
                     <button onclick='openEditModal(". json_encode($row) .")'>Edit</button>
-                    <form method='POST' action='' style='display:inline;'>
-                        <input type='hidden' name='deleteId' value='". $row['id'] ."'>
+                    <form method='POST' action='delete_row.php' style='display:inline;'>
+                        <input type='hidden' name='deleteId' value='". $row["id"] ."'>
                         <button type='submit' name='delete' onclick='return confirm(\"Are you sure you want to delete this row?\");'>Delete</button>
                     </form>
                   </td>
@@ -108,7 +110,7 @@ echo"Welcome, " . $_SESSION['username'] . "(Middleman)";
 </div>
 <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999;" onclick="closeEditModal()"></div>
 
-<div>
+<div> 
     <div>Add a row</div>
     <form action = "<?php htmlspecialchars($_SERVER["PHP_SELF"])?>" method= "post" >
         <label>ID</label>
@@ -131,6 +133,12 @@ echo"Welcome, " . $_SESSION['username'] . "(Middleman)";
         <input type="text" name="isle_shelf"><br>
         <input type = "submit" name = "submit" value = "add">
     </form>
+
+<form method = "get" action  ="<?php htmlspecialchars($_SERVER["PHP_SELF"])?>">
+<input type = "text" name = "search" placeholder = "Search..." >
+<button type = "submit">Search</button> 
+
+
 
 </div>
 <script>
@@ -168,7 +176,68 @@ function submitEdit() {
 </html>
 <a href= "logout.php">Logout</a>
 
+
+<?php 
+$conn = mysqli_connect("localhost", "root", "", "inventory-management");
+
+$sql = "SELECT * FROM `middleman-sender`";
+if (isset($_GET['search']) && !empty($_GET['search'])) {
+    $searchTerm = $conn->real_escape_string($_GET['search']); // Sanitize input
+    $sql .= " WHERE category LIKE '%$searchTerm%'
+                OR brand_name LIKE '%$searchTerm'
+                OR product_model LIKE '%$searchTerm'
+                OR branch LIKE '%$searchTerm'
+                OR id LIKE '%$searchTerm'
+                OR status LIKE '%$searchTerm'";
+}
+
+// Execute the query
+$result = $conn->query($sql);
+
+// Check if results exist
+if ($result->num_rows > 0) {
+    echo "<table border='1'>
+            <tr>
+                <th>ID</th>
+                <th>Category</th>
+                <th>Brand Name</th>
+                <th>Product Model</th>
+                <th>Quantity</th>
+                <th>Branch</th>
+                <th>Document</th>
+                <th>Status</th>
+                <th>Isle-Shelf</th>
+            </tr>";
+    // Fetch and display rows
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr>
+                <td>{$row['id']}</td>
+                <td>{$row['category']}</td>
+                <td>{$row['brand_name']}</td>
+                <td>{$row['product_model']}</td>
+                <td>{$row['quantity']}</td>
+                <td>{$row['branch']}</td>
+                <td>{$row['document']}</td>
+                <td>{$row['status']}</td>
+                <td>{$row["isle-shelf"]}</td>
+              </tr>";
+    }
+    echo "</table>";
+} else {
+    echo "No results found.";
+}
+
+// Close the connection
+$conn->close();
+
+
+if($_SERVER)
+
+?>
+
+
 <?php
+
 if($_SERVER["REQUEST_METHOD"] == "POST"){
     $id = filter_input(INPUT_POST, "id", FILTER_SANITIZE_SPECIAL_CHARS);
     $category = filter_input(INPUT_POST, "category", FILTER_SANITIZE_SPECIAL_CHARS);
@@ -193,6 +262,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         try{
             mysqli_query($conn, $sql);
             echo"Now added!";
+
               }catch(mysqli_sql_exception){
                    echo"That ID is already taken";
                }               
