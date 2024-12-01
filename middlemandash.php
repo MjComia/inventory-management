@@ -134,13 +134,12 @@ echo"Welcome, " . $_SESSION['username'] . "(Middleman)";
         <input type = "submit" name = "submit" value = "add">
     </form>
 
+</div>
+
 <form method = "get" action  ="<?php htmlspecialchars($_SERVER["PHP_SELF"])?>">
 <input type = "text" name = "search" placeholder = "Search..." >
 <button type = "submit">Search</button> 
 
-
-
-</div>
 <script>
 function openEditModal(row) {
     document.getElementById('editId').value = row.id;
@@ -228,10 +227,8 @@ if ($result->num_rows > 0) {
 }
 
 // Close the connection
-$conn->close();
 
 
-if($_SERVER)
 
 ?>
 
@@ -268,6 +265,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                }               
     }
 }
+$conn->close();
 /*
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete']))
     $deleteId = filter_input(INPUT_POST, 'deleteId', FILTER_SANITIZE_NUMBER_INT);
