@@ -1,94 +1,124 @@
 <?php 
+ob_start();
 session_start();
-$conn = mysqli_connect("localhost", "root", "", "inventory-management");
+include('inc/header.php');
 
-if(isset($_POST['register'])) {
-    $new_username = mysqli_real_escape_string($conn, $_POST ['new_username']);
-    $new_password = mysqli_real_escape_string($conn, $_POST ['new_password']);
-    $role = mysqli_real_escape_string($conn, $_POST ['role']);
+// Database connection
+$db_server = "localhost";
+$db_user = "root";
+$db_pass = "";
+$db_name = "ims_db";
 
-    $encrypted_password = md5($new_password);
+$conn = mysqli_connect($db_server, $db_user, $db_pass, $db_name);
 
-    //checker for user if already existing
-    $check_query = "SELECT * FROM users WHERE username = '$new_username'";
-    $check_result = mysqli_query($conn, $check_query);
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
+} else {
+    echo "You are connected <br>";
+}
 
-if(mysqli_num_rows($check_result) > 0) {
-    $register_error = "Username already exist. Please choose a different username";
-} else { //inserting new user in database
-    $insert_query = "INSERT INTO users (username, password, role) VALUES ('$new_username', '$encrypted_password', '$role')";    
-    if (mysqli_query($conn, $insert_query)) {
-        $register_success = "User registered successfully"; //hindi nag sshow kapag nag new register pwede tanggalin pero maganda ilagay
+$registerError = '';
+$registerSuccess = '';
 
-        $_SESSION['username'] = $new_username;
-        $_SESSION['role'] = $role;
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get form input and sanitize
+    $username = filter_input(INPUT_POST, "username", FILTER_SANITIZE_SPECIAL_CHARS);
+    $password = filter_input(INPUT_POST, "password", FILTER_SANITIZE_SPECIAL_CHARS);
+    $confirmPassword = filter_input(INPUT_POST, "confirm_password", FILTER_SANITIZE_SPECIAL_CHARS);
+    $email = filter_input(INPUT_POST, "email", FILTER_VALIDATE_EMAIL);
+    $role = filter_input(INPUT_POST, "role", FILTER_SANITIZE_SPECIAL_CHARS);
 
-        if ($role == 'admin') {
-            header("Location: admindash.php");
-        } elseif ($role == 'middleman') {
-            header("Location: middlemandash.php");
-        } elseif ($role == 'sender') {
-            header("Location: senderdash.php");
-        }
-        exit();
+    // Validate input
+    if (empty($username)) {
+        $registerError = "Please enter a username.";
+    } elseif (empty($email)) {
+        $registerError = "Please enter a valid email address.";
+    } elseif (empty($password)) {
+        $registerError = "Please enter a password.";
+    } elseif ($password !== $confirmPassword) {
+        $registerError = "Passwords do not match.";
+    } elseif (empty($role)) {
+        $registerError = "Please specify a role.";
     } else {
-        $register_error = "Error: " . mysqli_error($conn);
+        // Hash the password
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        // Insert new user into the database
+        $sql = "INSERT INTO ims_user (name, email, password, type) VALUES ('$username', '$email', '$hash', '$role')";
+
+        try {
+            if (mysqli_query($conn, $sql)) {
+                $registerSuccess = "Registration successful! Redirecting to login...";
+                header("Refresh: 2; url=index.php"); // Redirect after 2 seconds
+                exit();
+            } else {
+                $registerError = "Error: " . mysqli_error($conn);
+            }
+        } catch (Exception $e) {
+            $registerError = "Error during registration: " . $e->getMessage();
+        }
     }
-  }
 }
 ?>
-
-
-<!--------------------------------H T M L------------------------------------------------------------------------------------------------------------------>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-
-    <!--Stylesheets-->
-    <link rel="stylesheet" type="text/css" href="assets/cs/main.css"/>
-    
+    <title>Register - Inventory Management System</title>
 </head>
-
 <body>
+    <h1 class="text-center my-4 py-3 text-light" id="title">Inventory Management System - PHP</h1>    
 
-<?php if (isset($login_error)): ?>
-    <div class="message-box error"><?php echo $login_error; ?></div>
-<?php elseif (isset($register_error)): ?>
-    <div class="message-box error"><?php echo $register_error; ?></div>
-<?php elseif (isset($register_success)): ?>
-    <div class="message-box success"><?php echo $register_success; ?></div>
-<?php endif; ?> 
-
-    
-<h1>Register</h1>
-    <?php if (isset($register_error)): ?>
-        <p style= "color: red;"><?php echo $register_error; ?></p>
-        <?php elseif (isset($register_success)): ?>
-            <p style= "color: green;"> <?php echo  $register_success; ?></p>
-            <?php endif; ?>
-
-        <form method="post" action= "<?php htmlspecialchars($_SERVER["PHP_SELF"])?>">
-                <label for="new_username">Username: </label>
-                <input type="text" id="new_username" name="new_username" required autocomplete="off"><br><br>
-
-                <label for="new_password">Password: </label>
-                <input type="password" id="new_password" name="new_password" required autocomplete="off"><br><br>
-
-                <label for="role" > Role: </label> 
-                <select id="role" name="role" required>
-                    <option value="admin">Admin</option>
-                    <option value="middleman">Middleman</option>
-                    <option value="sender">Sender</option>
-                </select><br><br>
-
-                <button type="submit" name="register">Register</button>
-        </form>
-        
-        <!--JAVASCRIPTS-->
-        <script type="text/javascripts" src="assets/js/main.js"></script>
+    <!-- Registration Form -->
+    <div class="col-lg-4 col-md-5 col-sm-10 col-xs-12 mt-4">
+        <div class="card rounded-0 shadow">
+            <div class="card-header">
+                <div class="card-title h3 text-center mb-0 fw-bold">Register</div>
+            </div>
+            <div class="card-body">
+                <div class="container-fluid">
+                    <form method="post" action="">
+                        <div class="form-group">
+                            <?php if ($registerError) { ?>
+                                <div class="alert alert-danger rounded-0 py-1"><?php echo $registerError; ?></div>
+                            <?php } elseif ($registerSuccess) { ?>
+                                <div class="alert alert-success rounded-0 py-1"><?php echo $registerSuccess; ?></div>
+                            <?php } ?>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="control-label">Username</label>
+                            <input name="username" id="username" type="text" class="form-control rounded-0" placeholder="Username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="control-label">Email</label>
+                            <input type="email" class="form-control rounded-0" id="email" name="email" placeholder="Email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="control-label">Password</label>
+                            <input type="password" class="form-control rounded-0" id="password" name="password" placeholder="Password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirm_password" class="control-label">Confirm Password</label>
+                            <input type="password" class="form-control rounded-0" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="control-label">Role</label>
+                            <input type="text" class="form-control rounded-0" id="role" name="role" placeholder="Enter Role" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" name="register" class="btn btn-success rounded-0">Register</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
+
+<?php 
+include('inc/footer.php'); 
+mysqli_close($conn);
+?>
