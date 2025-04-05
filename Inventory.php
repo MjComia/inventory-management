@@ -246,7 +246,7 @@ class Inventory {
 			WHERE status = 'active' 
 			ORDER BY name ASC";	
 		$result = mysqli_query($this->dbConnect, $sqlQuery);	
-		$categoryHTML = '';
+		$categoryHTML = '';	
 		while( $category = mysqli_fetch_assoc($result)) {
 			$categoryHTML .= '<option value="'.$category["categoryid"].'">'.$category["name"].'</option>';	
 		}

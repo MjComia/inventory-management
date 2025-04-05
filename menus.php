@@ -13,14 +13,16 @@
 				<li class="nav-item"><a class="nav-link" href="supplier.php" id="supplier_menu">Supplier</a></li>
 				<li class="nav-item"><a class="nav-link" href="product.php" id="product_menu">Product</a></li>
 				<li class="nav-item"><a class="nav-link" href="purchase.php" id="purchase_menu">Purchase</a></li>
-				<li class="nav-item"><a class="nav-link" href="order.php" id="order_menu">Orders</a></li>			
+				<li class="nav-item"><a class="nav-link" href="order.php" id="order_menu">Orders</a></li>
+				<li class="nav-item"><a class="nav-link" href="generate.php" id="order_menu">Generate Report</a></li>
+				<li class="nav-item"><a class="nav-link" href="charts.php" id="order_menu">Charts</a></li>			
 			</ul>
 		</div>
 		<ul class="nav navbar-nav">
 			<li class="dropdown position-relative">
 				<button type="button" class="badge bg-light border px-3 text-dark rounded-pill dropdown-toggle" id="dropdownMenuButton1" data-bs-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false">
 					<span class="badge badge-pill bg-danger count"></span> 
-					<?php echo $_SESSION['name']; ?>
+					
 				</button>
 				<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
 					<li><a class="dropdown-item" href="action.php?action=logout">Logout</a></li>

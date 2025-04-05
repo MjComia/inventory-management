@@ -23,7 +23,7 @@ if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'getCustomer'){
 if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'customerUpdate'){
 	$inventory->updateCustomer();
 }
-if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'customerDelete'){
+if(!empty($_POST['btn_action']) && $_POST['btn_action'] == 'customer	elete'){
 	$inventory->deleteCustomer();
 }
 // Category management

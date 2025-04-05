@@ -19,10 +19,10 @@ if(isset($_POST['customer_id'])){
         
         while($row = $result->fetch_assoc()){
         $html .= "<div class = 'container'>
-                    <div>Name:". $row['name']."</div>
-                    <div>ID: ". $row['id']."</div>
-                    <div>Address: ". $row['address']."</div>
-                    <div>Mobile: ". $row['mobile']."</div>
+                    <div><strong>Name:</strong> ". $row['name'] ."</div>
+                    <div><strong>ID:</strong> ". $row['id'] ."</div>
+                    <div><strong>Address:</strong> ". $row['address'] ."</div>
+                    <div><strong>Mobile:</strong> ". $row['mobile'] ."</div>
                     </div>";
             $html .= "<hr>";
             $idCustomer = $row['id'];
@@ -33,10 +33,11 @@ if(isset($_POST['customer_id'])){
         if($result2->num_rows > 0){
             while($row2 = $result2->fetch_assoc()){
                 $html .= "<div class = 'container'>
-                            <div>Product ID: ".$row2['product_id']."</div> 
-                            <div>Order Date: ".$row2['order_date']."</div> 
-                            <div>Total Shipped: ".$row2['total_shipped']."</div></div>";
-                            $html .= "<hr>";
+                            <div><strong>Product ID:</strong> ". $row2['product_id'] ."</div> 
+                            <div><strong>Order Date:</strong> ". $row2['order_date'] ."</div> 
+                            <div><strong>Total Shipped:</strong> ". $row2['total_shipped'] ."</div>
+                            </div>";
+                $html .= "<hr>";
                 $purchaseID = $row2['product_id'];
 
               $sql3 = "SELECT * FROM ims_product WHERE pid = '$purchaseID'";
@@ -44,10 +45,10 @@ if(isset($_POST['customer_id'])){
                 if($result3->num_rows > 0 ){
                     while($row3 = $result3->fetch_assoc()){
                         $html .= "<div class = 'container'>
-                        <div>Brand ID: ".$row3['brandid']." </div>
-                        <div>Product Name: ".$row3['pname']." </div>
-                        <div>Model: ".$row3['model']." </div>
-                        <div>Description: ".$row3['description']." </div>
+                        <div><strong>Brand ID:</strong> ". $row3['brandid'] ."</div>
+                        <div><strong>Product Name:</strong> ". $row3['pname'] ."</div>
+                        <div><strong>Model:</strong> ". $row3['model'] ."</div>
+                        <div><strong>Description:</strong> ". $row3['description'] ."</div>
                         </div>";
                     }
                 }

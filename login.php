@@ -59,7 +59,7 @@ body>.container {
 						</div>  
 						<div class="d-grid">
 							<button type="submit" name="login" class="btn btn-success rounded-0">Login</button>
-							<a href = "register.php">Register</a>
+							
 						</div>
 					</form>
 				</div>
